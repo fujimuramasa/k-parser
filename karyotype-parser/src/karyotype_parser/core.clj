@@ -1,4 +1,5 @@
 (ns karyotype-parser.core
+	(:use ncl.karyotype.parse)
 	(:require 
 		[clojure.string :as str]
 		)
@@ -104,3 +105,11 @@
 	)
 )
 
+;check for t.
+(defn Tral [karyotype]
+	(let [sub (re-seq #"t[\d p q \( \) \;]*\)" karyotype)] 
+		(map Extr-mult-loc sub)
+	)
+)
+
+;option = delete ? or put it into re
