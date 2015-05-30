@@ -1,4 +1,5 @@
 (ns karyotype-parser.core
+<<<<<<< HEAD
 	(:use ncl.karyotype.parse)
 	(:require 
 		[clojure.string :as str]
@@ -113,3 +114,11 @@
 )
 
 ;option = delete ? or put it into re
+=======
+  (:gen-class))
+
+(defn -main
+  "I don't do a whole lot ... yet."
+  [& args]
+  (println "Hello, World!"))
+>>>>>>> parent of 8a2db52... basic layout of parser
