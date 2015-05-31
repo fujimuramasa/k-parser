@@ -1,6 +1,8 @@
 (ns karyotype-parser.core
 	(:require 
 		[clojure.string :as str]
+		[clojure.java.io :as io]
+		[tawny.owl :as owl]
 		)
   	(:gen-class))
 
@@ -112,3 +114,18 @@
 )
 
 ;option = delete ? or put it into re
+
+;;file handle
+(defn make-dic [line]
+	(let [div (str/split line #"@@")] 
+		(hash-map (first div) (rest div))
+	)
+)
+
+(defn make-database [loc]
+	(apply merge
+		(map make-dic
+			(with-open [rdr (io/reader loc)]
+				(doall (line-seq rdr))))))
+
+
