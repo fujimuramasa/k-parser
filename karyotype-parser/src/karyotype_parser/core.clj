@@ -63,6 +63,11 @@
 	)
 )
 
+(defn loc-parse [loc]
+	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.]+" loc) not-empty? (complement empty?)]
+		(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))))
+
+
 ;check for del.
 (defn Del [karyotype]
 	(let [sub (re-seq #"del[\d,p,q,\(,\),\.]*\)" karyotype)] 
@@ -163,7 +168,7 @@
 (defn make-database [loc]
 	(apply merge
 		(map make-dic
-			(with-open [rdr (io/reader "D:/project/parser/karyotype-parser/original.txt")]
+			(with-open [rdr (io/reader "D:/project/parser/karyotype-parser/test.txt")]
 				(doall (line-seq rdr))))))
 
 
