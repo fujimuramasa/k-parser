@@ -2,6 +2,7 @@
 	(:use [tawny.owl])
 	(:require 
 		[karyotype-parser.core :as co]
+		[karyotype-parser.property :as p]
 		[ncl.karyotype.human :as h]
 		[ncl.karyotype.events :as e]
 		[tawny.read :as r]
@@ -14,18 +15,27 @@
   :iri "http://karyotype"
   )
 
-(defoproperty hasPart)
+(defclass SampleSet)
+;(defclass HumanChromosome)
 
-;(def t (symbol "h/HumanChromosomeX"))
-
-(defclass VD)
-
-(defclass sampleset)
+;(doseq
+        ;[n ["X" "Y" "1" "2" "3"
+            ;"4" "5" "6" "7" "8"
+            ;"9" "10" "11" "12" 
+            ;"13" "14" "15" "16"
+            ;"17" "18" "19" "20"
+            ;"21" "22"]]
+      ;(owl-class (str "HumanChromosome" n) :subclass HumanChromosome))
 
 (def database (co/make-database 1))
 
 (defn create-class [s]
-	 (owl-class s :label (database s) :subclass sampleset (owl-some e/hasProvidingBreakPoint h/HumanChromosomeX)))
+	(owl-class s :label (database s) :subclass SampleSet 
+	 	;(map (fn [part] (owl-some p/HasAddition (co/loc-parse part))) (co/Add (database s)))
+	 	;(map (fn [part] (owl-some p/HasAddition (co/loc-parse part))) (co/Plus (database s)))
+	 	(map (fn [part] (owl-some p/HasDeletion (co/loc-parse part))) (co/Minus (database s)))
+	 	(map (fn [part] (owl-some p/HasDeletion (co/loc-parse part))) (co/Del (database s)))))
+
 
 (defn run-pipeline [] (map create-class (keys database)))
 

@@ -1,18 +1,41 @@
 (ns karyotype-parser.core
+	(:use [tawny.owl])
 	(:require 
 		[clojure.string :as str]
 		[clojure.java.io :as io]
 		[tawny.owl :as owl]
+		[ncl.karyotype.human :as h]
+		[karyotype-parser.property :as p]
 		)
   	(:gen-class))
 
+;basic functions
+(defn Extr-loc [exp]
+	(str/join (re-seq #"[\d,p,q,\.]" exp))
+)
+
+(defn Extr-mult-loc [exp]
+	(let [not-empty? (complement empty?)
+		coll (into [] (filter not-empty? (re-seq #"[\d,p,q,\.]*" exp)))
+		len (count coll)]
+			(map (fn [x] (str/join [(nth coll x) (nth coll (+ x (/ len 2)))])) (range (/ len 2)))
+	)
+)
+
+(defn loc-parse [loc]
+	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.]*" loc) not-empty? (complement empty?)]
+		(owl/owl-class
+			(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))
+			:subclass (str "HumanChromosome" chrom))))
+
+;parse functions
 ;check for "+",return details like ("+3" "+7").
 (defn Plus [karyotype]
-	(re-seq #"\+[\d,X,Y]*" karyotype))
+	(re-seq #"\+[\d X Y]*" karyotype))
 
 ;check for "-",return details like ("-3" "-7").
 (defn Minus [karyotype]
-	(re-seq #"\-[\d,X,Y]*" karyotype))
+	(re-seq #"(?<=\,)\-[\d X Y]*" karyotype))
 
 ;check for Fail.
 (defn Fail? [karyotype]
@@ -28,12 +51,6 @@
 		false
 	))
 
-;check for add (additional material of unkown origin).
-;(defn Add? [karyotype]
-	;(if (re-find #"add" karyotype)
-		;'True
-		;'False
-	;))
 
 ;check for +mar (mark chromosome).
 (defn Mar? [karyotype]
@@ -50,23 +67,6 @@
 	))
 
 ;Dash
-
-(defn Extr-loc [exp]
-	(str/join (re-seq #"[\d,p,q,\.]" exp))
-)
-
-(defn Extr-mult-loc [exp]
-	(let [not-empty? (complement empty?)
-		coll (into [] (filter not-empty? (re-seq #"[\d,p,q,\.]*" exp)))
-		len (count coll)]
-			(map (fn [x] (str/join [(nth coll x) (nth coll (+ x (/ len 2)))])) (range (/ len 2)))
-	)
-)
-
-(defn loc-parse [loc]
-	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.]+" loc) not-empty? (complement empty?)]
-		(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))))
-
 
 ;check for del.
 (defn Del [karyotype]
