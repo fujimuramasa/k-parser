@@ -5,28 +5,92 @@
 		[clojure.java.io :as io]
 		[tawny.owl :as owl]
 		[ncl.karyotype.human :as h]
-		[karyotype-parser.property :as p]
-		)
-  	(:gen-class))
+		[karyotype-parser.base :as pb]
+		))
 
 ;basic functions
 (defn Extr-loc [exp]
 	(str/join (re-seq #"[\d,p,q,\.]" exp))
 )
 
-(defn Extr-mult-loc [exp]
-	(let [not-empty? (complement empty?)
-		coll (into [] (filter not-empty? (re-seq #"[\d,p,q,\.]*" exp)))
-		len (count coll)]
-			(map (fn [x] (str/join [(nth coll x) (nth coll (+ x (/ len 2)))])) (range (/ len 2)))
+;(defn Extr-mult-loc [exp]
+	;(let [not-empty? (complement empty?)
+		;coll (into [] (filter not-empty? (re-seq #"[\d,p,q,\.]*" exp)))
+		;len (count coll)]
+			;(map (fn [x] (str/join [(nth coll x) (nth coll (+ x (/ len 2)))])) (range (/ len 2)))
+	;)
+;)
+
+(defn Extr-mult-loc [exp] 
+	(if (empty? (re-find #"[p q]" exp))
+		(re-seq #"(?<=[\; \(])[\d]*" exp)
+		(let [firpa (fn [part] (re-seq #"(?<=[\; \(])[\d]*" part))
+			secpa (fn [part] (re-seq #"[p q][\d]*" part))]
+			(map str/join (map list (firpa exp) (secpa exp))))))
+
+;(defn loc-parse [loc]
+	;(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.]*" loc) not-empty? (complement empty?)]
+		;(owl/owl-class
+			;(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))
+			;:subclass (str "HumanChromosome" chrom)
+		;)
+	;)
+;)
+
+(defn loc-parse [loc]
+	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.,ter]*" loc) not-empty? (complement empty?)]
+		(owl-class
+			(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))
+			:super (owl-some pb/IsLocatedOn (owl-class (str "HumanChromosome" chrom)))
+		)
 	)
 )
 
-(defn loc-parse [loc]
-	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.]*" loc) not-empty? (complement empty?)]
-		(owl/owl-class
-			(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)))
-			:subclass (str "HumanChromosome" chrom))))
+(defn loc-parse-with-qter [loc chrom]
+	(let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.,ter]*" loc) not-empty? (complement empty?)]
+		(owl-class	
+			(str (if (not-empty? chrom) (str "HumanChromosome" chrom))  (if (not-empty? band) (str "Band" band)) "!qter")
+			:super (owl-some pb/IsLocatedOn (owl-class (str "HumanChromosome" chrom)))
+		)
+	)
+)
+
+;(defn Receivepart [receive chrom]
+	;(owl-some pb/HasReceivePart (loc-parse-with-qter receive chrom))
+;)
+
+;;incomplete with bugs
+;(defn exchange-parse [coll]
+	;(let [receive (first coll) provide (first (rest coll))
+		  ;receive-chrom (re-find #"[X Y \d]*(?=[p q])" receive)
+		  ;provide-chrom (re-find #"[X Y \d]*(?=[p q])" provide)
+		  ;coll (vector receive provide-chrom provide receive-chrom)
+		  ;create (fn [part chrom] (owl-some pb/HasTranslocation (loc-parse-with-qter part chrom)))
+		  ;]
+	;(map create list (rest list))
+	;)
+;)
+
+(defn Tral-provide-parse [coll]
+	(let [receive (first coll) provide (first (rest coll))
+		  receive-chrom (re-find #"[X Y \d]*(?=[p q])" receive)
+		  provide-chrom (re-find #"[X Y \d]*(?=[p q])" provide)]
+		  (owl-some pb/HasTranslocation (loc-parse-with-qter receive provide-chrom))
+	)
+)
+
+(defn Tral-receive-parse [coll]
+	(let [receive (first coll) provide (first (rest coll))
+		  receive-chrom (re-find #"[X Y \d]*(?=[p q])" receive)
+		  provide-chrom (re-find #"[X Y \d]*(?=[p q])" provide)]
+		  (owl-some pb/HasTranslocation (loc-parse-with-qter provide receive-chrom))
+	)
+)
+
+
+
+
+
 
 ;parse functions
 ;check for "+",return details like ("+3" "+7").
@@ -112,9 +176,14 @@
 )
 
 ;check for t.
+(defn Tral-a [karyotype]
+	(let [firpa (fn [exp] (re-seq #"(?<=[\; \(])[\d]*" exp))
+		secpa (fn [exp] (re-seq #"[p q][\d]*" exp))]
+		(map str/join (map list (firpa karyotype) (secpa karyotype)))))
+
 (defn Tral [karyotype]
-	(let [sub (re-seq #"t[\d,p,q,\(,\),\.,\;]*\)" karyotype)] 
-		(map Extr-mult-loc sub)
+	(let [sub (re-seq #"(?<=,)t[\d,p,q,\(,\),\.,\;]*\)" karyotype)] 
+		(first (into [] (map Extr-mult-loc sub)))
 	)
 )
 
