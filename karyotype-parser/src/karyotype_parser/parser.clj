@@ -27,15 +27,23 @@
 ;;extrct chromosome and band information from more complicated ISCN karyotype part.
 ;;can ignore abnormality type.
 ;;eg. return a list containing 1p23 and 3q12 by detecting t(1;3)(p33;q21)
+;(defn Extr-mult-loc-old 
+  ;"read karyotype part like t(1;3)(p33;q21) and return (\"1p33\" \"3q21\")"
+  ;[exp] 
+  ;(if (empty? (re-find #"[p q]" exp))
+    ;(re-seq #"(?<=[\; \(])[\d]*" exp)
+    ;(let [firpa (fn [part] (re-seq #"(?<=[\; \(])[\d]*" part))
+		;secpa (fn [part] (re-seq #"[p q][\d \.]*" part))]
+      ;(map str/join (map list (firpa exp) (secpa exp))))))
+
 (defn Extr-mult-loc 
   "read karyotype part like t(1;3)(p33;q21) and return (\"1p33\" \"3q21\")"
   [exp] 
   (if (empty? (re-find #"[p q]" exp))
     (re-seq #"(?<=[\; \(])[\d]*" exp)
     (let [firpa (fn [part] (re-seq #"(?<=[\; \(])[\d]*" part))
-		secpa (fn [part] (re-seq #"[p q][\d \.]*" part))]
+    secpa (fn [part] (re-seq #"[p q][\d \.]*" part))]
       (map str/join (map list (firpa exp) (secpa exp))))))
-
 
 ;;check whether imported value exist in tawny karyotype human ontology.
 (defn Tawny-exist?
@@ -75,7 +83,10 @@
   "read a region like 1p21p33 and return (\"1p21\" \"1p33\")" 
   [region]
   (let [firpa (re-find #"[X Y \d]+" region) secpa (re-seq #"[p q][\d .]*" region)]
-    (map (fn [s] (str firpa s)) secpa)
+    (if (= (count secpa) 1)
+      (map (fn [s] (str firpa s)) (conj secpa (first secpa)))
+      (map (fn [s] (str firpa s)) secpa)
+    )
   )
 )
   
@@ -165,12 +176,13 @@
 (defn Dup
   "read karyotype and detect region duplication on chromosome, return a region" 
   [karyotype]
-  (let [sub (re-seq #"dup[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"(?<=\,)dup[\d,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;;convert "dup" to "duP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"up" "uP")))
-	  (map Extr-loc)
-	)
+	    (map Extr-loc)
+      (map Region-divide)
+	  )
   )	
 )
 
@@ -184,6 +196,7 @@
       ;convert "trp" to "trP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"rp" "rP")))
       (map Extr-loc)
+      (map Region-divide)
     )
   )	
 )
@@ -198,6 +211,7 @@
       ;convert "qdp" to "QdP" in strings to avoid misunderstanding because of "p" and "q".
       (map (fn [expr] (str/replace expr #"qdp" "QdP")))
       (map Extr-loc)
+      (map Region-divide)
     )
   )	
 )
@@ -215,7 +229,7 @@
   "read karyotype and detect band translocation on chromosome, return a list"
   [karyotype]
   (let [sub (re-seq #"(?<=,)t[\d,p,q,\(,\),\.,\;]*\)" karyotype)] 
-    (first (into [] (map Extr-mult-loc sub)))
+    (map Extr-mult-loc sub)
   )
 )
 

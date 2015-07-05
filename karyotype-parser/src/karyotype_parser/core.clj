@@ -13,8 +13,6 @@
 
 
 (defontology parser)
-(defoproperty tts)
-(defclass ab)
 (owl-import h/human)
 (owl-import e/events)
 
@@ -38,6 +36,7 @@
   (-> karyotype
     (str/replace "?" "")
     (str/replace #"\[[C,P,\d]*\]" "")
+    (str/replace #"/.+" "")
   )
 )
 
@@ -71,28 +70,74 @@
 (defn create-class 
   [s]
   (owl-class s :label (database s) :subclass SampleSet 
-    ;(if (empty? (p/Add (database s))) ()
-    ;(map (fn [part] (e/addition 1 (p/Loc-parse part))) (p/Add (database s)))
+    ;;create addition restriction
+    (map (fn [part] (e/addition 1 (p/Loc-parse part))) (p/Add (database s)))
     (map (fn [part] (e/addition (count (filter #{part} (p/Plus (database s)))) (p/Loc-parse part))) (p/Plus (database s)))
-    ;(map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del (database s)))
+    ;;create deletion restriction
+    (map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del (database s)))
     (map (fn [part] (e/deletion (count (filter #{part} (p/Minus (database s)))) (p/Loc-parse part))) (p/Minus (database s)))
+    ;;create inversion restriction
     ;(map (fn [s] 
-           ;(let [fir (first s) sec (second s)] 
-             ;(e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)] 
+               ;(e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
+             ;)
            ;)
-         ;)
+         ;) 
          ;(p/Inv (database s))
     ;)
-    ;(map (fn [part] (e/deletion 1 part)) 
-        ;(filter p/Valid? (map p/Loc-parse (p/Minus (database s))))
+    ;;craete translocation restriction
+    (map (fn [s]
+           (if (empty? s)
+             ()
+             (let [fir (first s) sec (second s)]
+               (e/translocation nil [(p/Loc-parse fir)] [(p/Loc-parse sec)])
+             )
+           )
+         )
+         (p/Tral (database s))
+    )
+    ;;create duplication restriction.
+    ;;need cover invdup!!
+    ;(map (fn [s]
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)]
+               ;(e/duplication nil (p/Loc-parse fir) (p/Loc-parse sec))
+             ;)
+           ;)
+         ;)
+         ;(p/Dup (database s))
     ;)
-    ;(map (fn [part] (e/deletion 1 part)) 
-        ;(filter p/Valid? (map p/Loc-parse (p/Del (database s))))
+    ;;create triplication restriction.
+    ;(map (fn [s]
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)]
+               ;(e/triplication 1 (p/Loc-parse fir) (p/Loc-parse sec))
+             ;)
+           ;
+         ;)
+         ;(p/Trp (database s))
     ;)
+    ;;create quadruplication restriction.
+    ;(map (fn [s]
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)]
+               ;(e/quadruplication 1 (p/Loc-parse fir) (p/Loc-parse sec))
+             ;)
+           ;)
+         ;)
+         ;(p/Qdp (database s))
+    ;)
+    
+    
   )
 )
 
-(defn check [s] (if (empty? (filter h/band? (map p/Loc-parse (p/Minus (database s))))) () s))
+;(defn check [s] (if (empty? (filter h/band? (map p/Loc-parse (p/Minus (database s))))) () s))
 
 
 (defn run-pipeline 
