@@ -15,10 +15,10 @@
 ;;extract chromosome and band information by detecting ISCN karyotype part.
 ;;can ignore abnormality type.
 ;;eg. return 1p33 by detecting add(1)(p33) .
-(defn Extr-loc
+(defn Extr-loc-old
   "read karyotype part like add(1)(p33) and return 1p33" 
   [exp]
-  (let [chrom (into [] (re-seq #"(?<=\()[\d]+" exp)) 
+  (let [chrom (into [] (re-seq #"(?<=\()[X Y \d]+" exp)) 
         band (into [] (re-seq #"(?<=\()[p q]+[\d \.]*" exp))]
     (cond
       (and (empty? chrom) (empty? band))
@@ -30,6 +30,16 @@
       (and ((complement empty?) band) ((complement empty?) chrom))
       (str (first chrom) (first band))
     )
+  )
+)
+
+(defn Extr-loc
+  "read karyotype part like add(1)(p33) and return 1p33" 
+  [exp]
+  (let [layout (re-seq #"(?<=\()[\d X Y U p q \.]*(?=\))" exp)
+        chrom (str/replace (first layout) "U" "C") 
+        band (str/replace (if (empty? (second layout)) "U" (second layout)) "U" "B")]
+    (str chrom band)
   )
 )
 
@@ -46,7 +56,7 @@
 		;secpa (fn [part] (re-seq #"[p q][\d \.]*" part))]
       ;(map str/join (map list (firpa exp) (secpa exp))))))
 
-(defn Extr-mult-loc 
+(defn Extr-mult-loc-old 
   "read karyotype part like t(1;3)(p33;q21) and return (\"1p33\" \"3q21\")"
   [exp]
   (let [numb (+ (/ (count (re-seq #"\;" exp)) 2) 1)
@@ -67,6 +77,25 @@
         )
       )
     )
+  )
+)
+
+
+(defn Extr-mult-loc 
+  "read karyotype part like t(1;3)(p33;q21) and return (\"1p33\" \"3q21\")"
+  [exp]
+  (let [layout (re-seq #"(?<=\()[\d X Y U p q \; \.]*(?=\))" exp)
+        chrom (map 
+                (fn [s] (str/replace s "U" "C"))
+                (str/split (first layout) #";"))
+        band (map
+               (fn [s] (str/replace s "U" "B"))
+               (if (empty? (second layout)) 
+                 (for [i (range (count chrom))] "U")
+                 (str/split (second layout) #";")
+               ))]
+  (for [z (range (count chrom))]
+    (str (nth chrom z) (nth band z)))  
   )
 )
 
@@ -100,7 +129,9 @@
                           (if (not-empty? band) (str "Band" band)))]
           (if (Tawny-exist? entity)
             (owl-class h/human entity)
-            (owl-class h/human entity :subclass h/HumanChromosomeBand)
+            (owl-class h/human 
+                       (str "HumanChromosome" chrom "Band" (re-find #"[p q]+" band)) 
+                       :subclass h/HumanChromosomeBand)
           )
         )
       )
@@ -196,7 +227,7 @@
 (defn Del 
   "read karyotype and detect band deletion on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"del[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"del[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )
@@ -206,7 +237,7 @@
 (defn Add 
   "read karyotype and detect band addition on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"add[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"add[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )
@@ -216,7 +247,7 @@
 (defn Dup
   "read karyotype and detect region duplication on chromosome, return a region" 
   [karyotype]
-  (let [sub (re-seq #"(?<=\,)dup[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"(?<=\,)dup[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;;convert "dup" to "duP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"up" "uP")))
@@ -231,7 +262,7 @@
 (defn Trp 
   "read karyotype and detect region triplication on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"trp[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"trp[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;convert "trp" to "trP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"rp" "rP")))
@@ -246,7 +277,7 @@
 (defn Qdp
   "read karyotype and detect region quadruplication on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"qdp[\d,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"qdp[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;convert "qdp" to "QdP" in strings to avoid misunderstanding because of "p" and "q".
       (map (fn [expr] (str/replace expr #"qdp" "QdP")))
@@ -268,7 +299,7 @@
 (defn Tral 
   "read karyotype and detect band translocation on chromosome, return a list"
   [karyotype]
-  (let [sub (re-seq #"(?<=,)t[\d,p,q,\(,\),\.,\;]*\)" karyotype)] 
+  (let [sub (re-seq #"(?<=,)t[\d,X,Y,p,q,\(,\),\.,\;]*\)" karyotype)] 
     (map Extr-mult-loc sub)
   )
 )
@@ -278,7 +309,7 @@
 (defn Inv 
   "read karyotype and detect region inversion on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"inv[\d,p,q,\(,\),\;,\.]*\)" karyotype)] 
+  (let [sub (re-seq #"inv[\d,X,Y,p,q,\(,\),\;,\.]*\)" karyotype)] 
     (map (fn [s] (Region-divide (Extr-loc s))) sub)
   )
 )
@@ -288,7 +319,7 @@
 (defn Fis 
   "read karyotype and detect fission on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"fis[\d,p,q,\(,\),\;,\.]*\)" karyotype)] 
+  (let [sub (re-seq #"fis[\d,X,Y,p,q,\(,\),\;,\.]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )
