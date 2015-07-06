@@ -34,6 +34,7 @@
   "delete \"?\" and clone size symbol" 
   [karyotype]
   (-> karyotype
+    (str/replace #"(?<=[\( \;])\?(?=[\) \;])" "U")
     (str/replace "?" "")
     (str/replace #"\[[C,P,\d]*\]" "")
     (str/replace #"/.+" "")
@@ -88,16 +89,16 @@
          ;(p/Inv (database s))
     ;)
     ;;craete translocation restriction
-    (map (fn [s]
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)]
-               (e/translocation nil [(p/Loc-parse fir)] [(p/Loc-parse sec)])
-             )
-           )
-         )
-         (p/Tral (database s))
-    )
+    ;(map (fn [s]
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)]
+               ;(e/translocation nil [(p/Loc-parse fir)] [(p/Loc-parse sec)])
+             ;)
+           ;)
+         ;)
+         ;(p/Tral (database s))
+    ;)
     ;;create duplication restriction.
     ;;need cover invdup!!
     ;(map (fn [s]
@@ -150,3 +151,23 @@
   [] 
   (save-ontology "ontology.owl" :owl)
 )
+
+
+(defn dotest 
+  [start end]
+  (for [i (range start end)]
+    (owl-class (str i) :label (database (str i)) :subclass SampleSet
+      (map (fn [s]
+        (if (empty? s)
+          ()
+          (let [fir (first s) sec (second s)]
+            (e/translocation nil [(p/Loc-parse fir)] [(p/Loc-parse sec)])
+          )
+        )
+      )
+      (p/Tral (database (str i)))
+      )
+    ) 
+  )
+)
+    

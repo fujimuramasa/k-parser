@@ -18,18 +18,8 @@
 (defn Extr-loc
   "read karyotype part like add(1)(p33) and return 1p33" 
   [exp]
-  (let [chrom (into [] (re-seq #"(?<=\()[\d]+" exp)) 
-        band (into [] (re-seq #"(?<=\()[p q]+[\d \.]*" exp))]
-    (cond
-      (and (empty? chrom) (empty? band))
-      "CB"
-      (and ((complement empty?) chrom) (empty? band))
-      (str chrom "B")
-      (and ((complement empty?) band) (empty? chrom))
-      (str "C" band)
-      (and ((complement empty?) band) ((complement empty?) chrom))
-      (str (first chrom) (first band))
-    )
+  (str/join 
+    (re-seq #"[\d,p,q,\.]" exp)
   )
 )
 
@@ -46,29 +36,25 @@
 		;secpa (fn [part] (re-seq #"[p q][\d \.]*" part))]
       ;(map str/join (map list (firpa exp) (secpa exp))))))
 
-(defn Extr-mult-loc 
+(defn Extr-test 
   "read karyotype part like t(1;3)(p33;q21) and return (\"1p33\" \"3q21\")"
   [exp]
-  (let [numb (+ (/ (count (re-seq #"\;" exp)) 2) 1)
-        chrom (into [] (re-seq #"(?<=[\; \(])[\d]+" exp)) 
-        band (into [] (re-seq #"(?<=[\; \(])[p q]+[\d \.]*" exp))]
-    (if (= (count chrom) (count chrom))
-      (cond 
-        (and (empty? chrom) (empty? band))
-        (for [i (range numb)]
-          "CB")
-        (and ((complement empty?) chrom) (empty? band))
-        (map (fn [s] (str s "B")) chrom)
-        (and ((complement empty?) band) (empty? chrom))
-        (map (fn [s] (str "C" s)) band)
-        (and ((complement empty?) band) ((complement empty?) chrom))
-        (for [i (range (count chrom))]
-          (str (chrom i) (band i))
+  (let [chrom (into [] (re-seq #"(?<=[\; \(])[\d]+" exp)) 
+      band (into [] (re-seq #"(?<=[\; \(])[p q]+[\d \.]*" exp))]
+    (cond 
+      (and (empty? chrom) (empty? band))
+      ["CB" "CB"]
+      (and ((complement empty?) chrom) (empty? band))
+      (map (fn [s] (str s "B")) chrom)
+      (and ((complement empty?) band) (empty? chrom))
+      (map (fn [s] (str "C" s)) band)
+      (and ((complement empty?) band) ((complement empty?) chrom))
+      (for [i (range (count chrom))]
+        (str (chrom i) (band i))
         )
       )
     )
   )
-)
 
 ;;check whether imported value exist in tawny karyotype human ontology.
 (defn Tawny-exist?
@@ -82,31 +68,16 @@
 (defn Loc-parse 
   "read expression like 1p33 and return HumanChromosome1Bandp33"
   [loc]
-  ;(if (empty? loc)
-    ;()
-    (let [chrom (re-find #"[\d,X,Y,C]+" loc) 
-        band (re-find #"[p,q][\d+,\.,ter]*|B" loc) 
-        ]
-      (cond
-        (and (= chrom "C") (= band "B"))
-        (owl-class h/human "HumanChromosomeBand" :subclass h/HumanChromosomeBand)
-        (and (not= chrom "C") (= band "B"))
-        (owl-class h/human (str "HumanChromosome" chrom "Band") :subclass h/HumanChromosomeBand)
-        (and (= chrom "C") (not= band "B"))
-        (owl-class h/human (str "HumanChromosomeBand" band) :subclass h/HumanChromosomeBand)
-        :else
-        (let [not-empty? (complement empty?)
-              entity (str (if (not-empty? chrom) (str "HumanChromosome" chrom))
-                          (if (not-empty? band) (str "Band" band)))]
-          (if (Tawny-exist? entity)
-            (owl-class h/human entity)
-            (owl-class h/human entity :subclass h/HumanChromosomeBand)
-          )
-        )
+  (let [chrom (re-find #"[\d,X,Y]+" loc) band (re-find #"[p,q][\d+,\.,ter]*" loc) 
+        not-empty? (complement empty?)
+        entity (str (if (not-empty? chrom) (str "HumanChromosome" chrom))  
+           (if (not-empty? band) (str "Band" band)))]
+    (if (Tawny-exist? entity)
+      (owl-class h/human entity)
+      (owl-class h/human entity :subclass h/HumanChromosomeBand)
       )
     )
-  ;)
-)
+  )
 
 
 ;;check whether imported value is a valid chromosome or band.
