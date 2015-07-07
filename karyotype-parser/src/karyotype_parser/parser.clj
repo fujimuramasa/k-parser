@@ -5,6 +5,7 @@
 		[clojure.java.io :as io]
 		[tawny.owl :as owl]
 		[ncl.karyotype.human :as h]
+    [karyotype-parser.base :as b]
   )
 )
 
@@ -152,14 +153,32 @@
 ;;and return its start and end band in a list.
 (defn Region-divide
   "read a region like 1p21p33 and return (\"1p21\" \"1p33\")" 
-  [region]
+  [n region]
   (let [firpa (re-find #"[X Y \d]+" region) secpa (re-seq #"[p q][\d .]*" region)]
-    (if (= (count secpa) 1)
-      (map (fn [s] (str firpa s)) (conj secpa (first secpa)))
-      (map (fn [s] (str firpa s)) secpa)
+    (cond 
+      (= n 1)
+      (if (= (count secpa) 1)
+        (conj (conj secpa (first secpa)) firpa)
+        (conj secpa firpa))
+      (= n 2)
+      (if (= (count secpa) 1)
+        (map (fn [s] (str firpa s)) (conj secpa (first secpa)))
+        (map (fn [s] (str firpa s)) secpa))
+      )
     )
   )
-)
+
+
+;;create region entity.
+(defn Create-region
+  "read a region like 1p21p33 and return an owl entity"
+  [region]
+  (let [layout (Region-divide region)]
+    (owl-class b/karontology 
+               (str "HumanChromosome" (first layout) "Band" (second layout) "=>" (last layout))
+               :subclass b/HumanChromosomeRegion)
+    )
+  )
   
 
 ;;abnormality detection functions

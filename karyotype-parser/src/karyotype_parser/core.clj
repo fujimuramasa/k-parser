@@ -8,23 +8,20 @@
   	[ncl.karyotype.events :as e]
     [ncl.karyotype.karyotype :as k]
 		[karyotype-parser.parser :as p]
+    [karyotype-parser.base :as bb]
   )
 )
 
 
-(defontology parser)
-(owl-import h/human)
-(owl-import e/events)
 
 ;;create an ontology for storing Acute Lymphoblastic Leukaemia karyotype.
-(defontology karontology
-  :prefix "kar:"
-  :comment "An ontology modelled on an acute lymphoblastic leukemia"
-  :iri "http://karyotype"
+(defontology parser
+  :prefix "par:"
+  :comment "An ontology created for storing data"
+  :iri "http://parser"
   )
 
 (defclass SampleSet)
-
 
 ;;file handle
 
@@ -75,21 +72,21 @@
   (owl-class s :label (database s) :subclass SampleSet 
     ;;create addition restriction
     ;(map (fn [part] (e/addition 1 (p/Loc-parse part))) (p/Add (database s)))
-    ;(map (fn [part] (e/addition (count (filter #{part} (p/Plus (database s)))) (p/Loc-parse part))) (p/Plus (database s)))
+    (map (fn [part] (e/addition (count (filter #{part} (p/Plus (database s)))) (p/Loc-parse part))) (p/Plus (database s)))
     ;;create deletion restriction
     ;(map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del (database s)))
-    ;(map (fn [part] (e/deletion (count (filter #{part} (p/Minus (database s)))) (p/Loc-parse part))) (p/Minus (database s)))
+    (map (fn [part] (e/deletion (count (filter #{part} (p/Minus (database s)))) (p/Loc-parse part))) (p/Minus (database s)))
     ;;create inversion restriction
-    (map (fn [s] 
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)] 
-               (e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
-             )
-           )
-         ) 
-         (p/Inv (database s))
-    )
+    ;(map (fn [s] 
+           ;(if (empty? s)
+             ;()
+             ;(let [fir (first s) sec (second s)] 
+               ;(e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
+             ;)
+           ;)
+         ;) 
+         ;(p/Inv (database s))
+    ;)
     ;;craete translocation restriction
     (map (fn [s]
            (if (empty? s)
@@ -165,9 +162,7 @@
   [start end]
   (for [i (range start end)]
     (owl-class (str i) :label (database (str i)) :subclass SampleSet
-      (map
-        (fn [part] (e/addition (count (filter #{part} (p/Plus (database (str i))))) (p/Loc-parse part)))
-        (p/Plus (database (str i))))
+      (bb/addition-new 1 "1p23p24")
     ) 
   )
 )
