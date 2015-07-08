@@ -8,7 +8,7 @@
   	[ncl.karyotype.events :as e]
     [ncl.karyotype.karyotype :as k]
 		[karyotype-parser.parser :as p]
-    [karyotype-parser.base :as bb]
+    [karyotype-parser.base :as b]
   )
 )
 
@@ -77,16 +77,16 @@
     ;(map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del (database s)))
     (map (fn [part] (e/deletion (count (filter #{part} (p/Minus (database s)))) (p/Loc-parse part))) (p/Minus (database s)))
     ;;create inversion restriction
-    ;(map (fn [s] 
-           ;(if (empty? s)
-             ;()
-             ;(let [fir (first s) sec (second s)] 
-               ;(e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
-             ;)
-           ;)
-         ;) 
-         ;(p/Inv (database s))
-    ;)
+    (map (fn [s] 
+           (if (empty? s)
+             ()
+             (let [fir (first s) sec (second s)] 
+               (e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
+             )
+           )
+         ) 
+         (p/Inv (database s))
+    )
     ;;craete translocation restriction
     (map (fn [s]
            (if (empty? s)
@@ -162,7 +162,16 @@
   [start end]
   (for [i (range start end)]
     (owl-class (str i) :label (database (str i)) :subclass SampleSet
-      (bb/addition-new 1 "1p23p24")
+      (map (fn [s] 
+           (if (empty? s)
+             ()
+             (let [layout (map p/Loc-parse s)] 
+               (e/insertion nil (vector (first layout)) (into [] (rest layout)))
+             )
+           )
+         ) 
+         (p/Ins (database (str i)))
+      )
     ) 
   )
 )

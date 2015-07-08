@@ -88,13 +88,26 @@
   (let [layout (re-seq #"(?<=\()[\d X Y U p q \; \.]*(?=\))" exp)
         chrom (map 
                 (fn [s] (str/replace s "U" "C"))
-                (str/split (first layout) #";"))
+                ;;detect the number of chromosome in the first bracket
+                ;;thereby checking whether abnormality happen on the same chromsome.
+                ;;eg. ins(1;7)(q11;p11p11) or ins(1)(q11q25q25) 
+                (let [a (str/split (first layout) #";")]
+                  (if (= (count a) 1)
+                    (conj a (first a))
+                    a
+                  )))
         band (map
                (fn [s] (str/replace s "U" "B"))
                (if (empty? (second layout)) 
                  (for [i (range (count chrom))] "U")
-                 (str/split (second layout) #";")
-               ))]
+                 (let [b (str/split (second layout) #";")]
+                   (if (= (count b) 1)
+                     (let [c (re-seq #"[p q U][\d]*" (first b))]
+                       (list (first c) (apply str (rest c))))
+                     b)
+                   )
+                 )
+               )]
   (for [z (range (count chrom))]
     (str (nth chrom z) (nth band z)))  
   )
@@ -153,14 +166,12 @@
 ;;and return its start and end band in a list.
 (defn Region-divide
   "read a region like 1p21p33 and return (\"1p21\" \"1p33\")" 
-  [n region]
-  (let [firpa (re-find #"[X Y \d]+" region) secpa (re-seq #"[p q][\d .]*" region)]
-    (cond 
-      (= n 1)
+  [region & [n]]
+  (let [firpa (re-find #"[X Y C \d]+" region) secpa (re-seq #"[p q B][\d .]*" region)]
+    (if n
       (if (= (count secpa) 1)
         (conj (conj secpa (first secpa)) firpa)
         (conj secpa firpa))
-      (= n 2)
       (if (= (count secpa) 1)
         (map (fn [s] (str firpa s)) (conj secpa (first secpa)))
         (map (fn [s] (str firpa s)) secpa))
@@ -173,7 +184,7 @@
 (defn Create-region
   "read a region like 1p21p33 and return an owl entity"
   [region]
-  (let [layout (Region-divide region)]
+  (let [layout (Region-divide region 1)]
     (owl-class b/karontology 
                (str "HumanChromosome" (first layout) "Band" (second layout) "=>" (last layout))
                :subclass b/HumanChromosomeRegion)
@@ -246,7 +257,7 @@
 (defn Del 
   "read karyotype and detect band deletion on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"del[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"del[\d,X,Y,p,q,\(,\),\.,U]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )
@@ -256,7 +267,7 @@
 (defn Add 
   "read karyotype and detect band addition on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"add[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"add[\d,X,Y,U,p,q,\(,\),\.]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )
@@ -266,7 +277,7 @@
 (defn Dup
   "read karyotype and detect region duplication on chromosome, return a region" 
   [karyotype]
-  (let [sub (re-seq #"(?<=\,)dup[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"(?<=\,)dup[\d,X,Y,U,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;;convert "dup" to "duP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"up" "uP")))
@@ -281,7 +292,7 @@
 (defn Trp 
   "read karyotype and detect region triplication on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"trp[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"trp[\d,X,Y,U,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;convert "trp" to "trP" in strings to avoid misunderstanding because of "p".
       (map (fn [expr] (str/replace expr #"rp" "rP")))
@@ -296,7 +307,7 @@
 (defn Qdp
   "read karyotype and detect region quadruplication on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"qdp[\d,X,Y,p,q,\(,\),\.]*\)" karyotype)] 
+  (let [sub (re-seq #"qdp[\d,X,Y,U,p,q,\(,\),\.]*\)" karyotype)] 
     (->> sub
       ;convert "qdp" to "QdP" in strings to avoid misunderstanding because of "p" and "q".
       (map (fn [expr] (str/replace expr #"qdp" "QdP")))
@@ -318,17 +329,30 @@
 (defn Tral 
   "read karyotype and detect band translocation on chromosome, return a list"
   [karyotype]
-  (let [sub (re-seq #"(?<=,)t[\d,X,Y,p,q,\(,\),\.,\;]*\)" karyotype)] 
+  (let [sub (re-seq #"(?<=,)t[\d,X,Y,U,p,q,\(,\),\.,\;]*\)" karyotype)] 
     (map Extr-mult-loc sub)
   )
 )
+
+
+;;detect ins(insertion) in karyotype, 
+;;return a list of band name like (\"1p33\" "\3q21"\ \"3q23\").
+(defn Ins 
+  "read karyotype and detect band insertion on chromosome, return a list"
+  [karyotype]
+  (let [sub (re-seq #"(?<=,)ins[\d,X,Y,U,p,q,\(,\),\.,\;]*\)" karyotype)
+        extr (map Extr-mult-loc sub)]
+    (map 
+      (fn [s] (conj (Region-divide (second s)) (first s))) 
+      extr))
+  )
 
 
 ;;detect inv(inversion) in karyotype, return a region like 1p21p33.
 (defn Inv 
   "read karyotype and detect region inversion on chromosome, return a region"
   [karyotype]
-  (let [sub (re-seq #"inv[\d,X,Y,p,q,\(,\),\;,\.]*\)" karyotype)] 
+  (let [sub (re-seq #"inv[\d,X,Y,U,p,q,\(,\),\;,\.]*\)" karyotype)] 
     (map (fn [s] (Region-divide (Extr-loc s))) sub)
   )
 )
@@ -338,7 +362,7 @@
 (defn Fis 
   "read karyotype and detect fission on chromosome, return a band"
   [karyotype]
-  (let [sub (re-seq #"fis[\d,X,Y,p,q,\(,\),\;,\.]*\)" karyotype)] 
+  (let [sub (re-seq #"fis[\d,X,Y,U,p,q,\(,\),\;,\.]*\)" karyotype)] 
     (map Extr-loc sub)
   )
 )

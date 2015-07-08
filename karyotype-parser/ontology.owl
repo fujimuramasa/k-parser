@@ -27,184 +27,70 @@
         <Class IRI="#SampleSet"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#1001"/>
+        <Class IRI="#1114"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#1002"/>
+        <Class IRI="#1115"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#1003"/>
+        <Class IRI="#1150"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#1004"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#1005"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#1006"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#1007"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#1008"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#1009"/>
+        <Class IRI="#1151"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="#1001"/>
+        <Class IRI="#1114"/>
         <Class IRI="#SampleSet"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#1001"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1002"/>
+        <Class IRI="#1115"/>
         <Class IRI="#SampleSet"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#1002"/>
-        <ObjectExactCardinality cardinality="1">
+        <Class IRI="#1115"/>
+        <ObjectSomeValuesFrom>
             <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
             <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
+                <Class abbreviatedIRI="evn:InsertionTwoChromosome"/>
                 <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
+                    <ObjectProperty abbreviatedIRI="evn:hasProvidingBreakPoint"/>
+                    <Class abbreviatedIRI="hum:HumanChromosomeBand"/>
+                </ObjectSomeValuesFrom>
+                <ObjectSomeValuesFrom>
+                    <ObjectProperty abbreviatedIRI="evn:hasReceivingBreakPoint"/>
+                    <Class abbreviatedIRI="hum:HumanChromosome13Band"/>
                 </ObjectSomeValuesFrom>
             </ObjectIntersectionOf>
-        </ObjectExactCardinality>
+        </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#1003"/>
+        <Class IRI="#1150"/>
         <Class IRI="#SampleSet"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#1003"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1004"/>
+        <Class IRI="#1151"/>
         <Class IRI="#SampleSet"/>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#1004"/>
-        <ObjectExactCardinality cardinality="1">
+        <Class IRI="#1151"/>
+        <ObjectSomeValuesFrom>
             <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
             <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
+                <Class abbreviatedIRI="evn:DirectInsertionTwoChromosome"/>
                 <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
+                    <ObjectProperty abbreviatedIRI="evn:hasProvidingBreakPoint"/>
+                    <Class abbreviatedIRI="hum:HumanChromosome4Bandq21"/>
+                </ObjectSomeValuesFrom>
+                <ObjectSomeValuesFrom>
+                    <ObjectProperty abbreviatedIRI="evn:hasProvidingBreakPoint"/>
+                    <Class abbreviatedIRI="hum:HumanChromosome4Bandq24"/>
+                </ObjectSomeValuesFrom>
+                <ObjectSomeValuesFrom>
+                    <ObjectProperty abbreviatedIRI="evn:hasReceivingBreakPoint"/>
+                    <Class abbreviatedIRI="hum:HumanChromosome11Bandq23"/>
                 </ObjectSomeValuesFrom>
             </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1005"/>
-        <Class IRI="#SampleSet"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1005"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1006"/>
-        <Class IRI="#SampleSet"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1006"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1007"/>
-        <Class IRI="#SampleSet"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1007"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1008"/>
-        <Class IRI="#SampleSet"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1008"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1009"/>
-        <Class IRI="#SampleSet"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#1009"/>
-        <ObjectExactCardinality cardinality="1">
-            <ObjectProperty abbreviatedIRI="evn:hasDirectEvent"/>
-            <ObjectIntersectionOf>
-                <Class abbreviatedIRI="evn:Addition"/>
-                <ObjectSomeValuesFrom>
-                    <ObjectProperty abbreviatedIRI="evn:hasBreakPoint"/>
-                    <Class IRI="http://karyotype#HumanChromosome1Bandp23top24"/>
-                </ObjectSomeValuesFrom>
-            </ObjectIntersectionOf>
-        </ObjectExactCardinality>
+        </ObjectSomeValuesFrom>
     </SubClassOf>
     <AnnotationAssertion>
         <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
@@ -213,93 +99,43 @@
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1001</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1001</Literal>
+        <IRI>#1114</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1114</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1001</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,XX,der(10)t(1;10)(q21;q26),der(19)t(1;19)(q23;p13)</Literal>
+        <IRI>#1114</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">47,XY,t(7;10)(q34;q24),+8,del(9)(p21)</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1002</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1002</Literal>
+        <IRI>#1115</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1115</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1002</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">49,X,t(X;4)(q25;q3),t(1;9)(q11-12;q11-12),-5,+8,del(10)(q25q26),add(12)(q11),+del(17)(p11),+der(U)t(U;12)(U;q13)x2,mar</Literal>
+        <IRI>#1115</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">47,XX,t(3;6)(q23;q26),-4,-5,t(6;14)(q22;q11),-8,del(10)(q23q25),t(10;11)(q23;q14),der(12)t(5;12)(q22;p12),der(12)t(8;12)(q21;q24),ins(13;U),add(15)(p13),4mar</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1003</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1003</Literal>
+        <IRI>#1150</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1150</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1003</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">56,XX,+X,+X,t(2;16)(p12;q12),+4,+5,+6,+10,+18,der(20)t(1;20)(q12;q13),+21,+21,mar</Literal>
+        <IRI>#1150</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">47,XY,del(1)(q22),mar</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1004</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1004</Literal>
+        <IRI>#1151</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1151</Literal>
     </AnnotationAssertion>
     <AnnotationAssertion>
         <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1004</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,XX,der(2)t(1;2)(q12-21;q37),del(7)(q21q31),t(9;22)(q34;q11)</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1005</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1005</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1005</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">47,XX,del(1)(p12),t(12;21)(p13;q22),+der(U)t(1;8;12)</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1006</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1006</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1006</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,XX,del(8)(q24),t(12;13)(p13;q21),t(12;21)(p13;q22)</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1007</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1007</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1007</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,X,der(Y),dic(21)(q22)</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1008</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1008</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1008</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,XX,t(3;3)(p26;q21),add(5)(q35),add(9)(p24)</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty IRI="http://www.purl.org/ontolink/tawny#name"/>
-        <IRI>#1009</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">1009</Literal>
-    </AnnotationAssertion>
-    <AnnotationAssertion>
-        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
-        <IRI>#1009</IRI>
-        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">53,XY,+X,+Y,inv(3)(p14q21),add(4)(q35),+9,+17,+21,+21,+dup(21)(q22q22)</Literal>
+        <IRI>#1151</IRI>
+        <Literal xml:lang="en" datatypeIRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">46,XX,ins(11;4)(q23;q21q24)</Literal>
     </AnnotationAssertion>
 </Ontology>
 
