@@ -1,32 +1,18 @@
 # karyotype-parser
 
-FIXME: description
 
-## Installation
+this is a brief introduction for using k-parser.
+1. create a txt file and write each line with format like "[RegID]@@[Karyotype string]". (eg. "1001@@46,XY")
+2. change file name to "import.txt" and put it in the parser folder.
+3. run clojure repl and type the following commands.
+	>(use 'karyotype-parser.core)
+	>(ns karyotype-parser.core)
+	>(full-pipeline)
+	>(save-karontology)
+4. there will be a owl file called ontology.owl generated in the parser folder.
 
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar karyotype-parser-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+*two datasets mentioned in the dissertation are stored in parser folder called MD.txt (Mitelman database) and LRCG.txt (LRCG database) respectively.
+**main codes are stored in .../src/karyotype_parser folder due to leiningen project template. 
 
 ## License
 

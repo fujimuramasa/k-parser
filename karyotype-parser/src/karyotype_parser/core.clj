@@ -3,16 +3,15 @@
   (:require 
 		[clojure.string :as str]
 		[clojure.java.io :as io]
-		[tawny.owl :as owl]
+    [tawny.reasoner :as r]
 		[ncl.karyotype.human :as h]
   	[ncl.karyotype.events :as e]
     [ncl.karyotype.karyotype :as k]
 		[karyotype-parser.parser :as p]
-    [karyotype-parser.base :as b]
   )
 )
 
-
+(r/reasoner-factory :elk)
 
 ;;create an ontology for storing Acute Lymphoblastic Leukaemia karyotype.
 (defontology parser
@@ -21,42 +20,58 @@
   :iri "http://parser"
   )
 
-(defclass SampleSet)
+(defclass Sample)
 
 ;;file handle
 
 
 ;;wash karyotype
 (defn clean-karyotype
-  "delete \"?\" and clone size symbol" 
+  "clean some symbols which may confusing recognization" 
   [karyotype]
   (-> karyotype
+    ;;remove In situ Hybridization symbols which contains [wcp]
+    (str/replace #"[^\(]*wcp[^\)]*" "")
+    (str/replace #"[^\(]*TEL[^\)]*" "")
+    (str/replace #"[^\(]*AML[^\)]*" "")
+    (str/replace #"(?<=[\/ \,])[^@]*cen[^@]*(?=\[)" "")
+    ;;remove empty ()
+    (str/replace #"\(\)" "")
+    ;;remove composite karyotype symbols (like [CP4])
+    (str/replace #"\[cp[\d]*\]|\[CP[\d]*\]" "")
+    ;;remove clone size numbers (like [23])
+    (str/replace #"\[[\d \% \.]+\]" "")
+    ;(str/replace #"\([\d]*\%\)" "")
+    ;;find brackets only contain a single ? and replace these ? with U.
     (str/replace #"(?<=[\( \;])\?(?=[\) \;])" "U")
+    ;;remove other ?
     (str/replace "?" "")
-    (str/replace #"\[[C,P,\d]*\]" "")
-    ;;delete subclone
-    (str/replace #"/.+" "")
+    ;;remove plus sign before mar
     (str/replace #"(?<=\,)\+(?=[\d \-]*mar)" "")
   )
 )
 
 
 ;;parse file text format.
-;;format like "3054@@46,XY[25]"
+;;format should obey a format like "RegID@@Karyotype" (eg. "3054@@46,XY[25]")
 (defn make-dic 
   [line]
-  (let [div (str/split line #"@@")] 
-    (hash-map (first div) (clean-karyotype (get (into [] (rest div)) 0)))
+  (if (empty? (re-find #"@@" line))
+    ()
+    (let [div (str/split line #"@@")] 
+      (hash-map (first div) (clean-karyotype (second div)))
+      )
+    )
   )
-)
 
 
 ;;read file
+;;change file name in the following string "import.txt".
 (defn make-database 
   []
   (apply merge
     (map make-dic
-      (with-open [rdr (io/reader "D:/project/parser/karyotype-parser/test.txt")]
+      (with-open [rdr (io/reader "LRCG.txt")]
         (doall (line-seq rdr))
       )
     )
@@ -66,113 +81,119 @@
 
 (def database (make-database))
 
-
-(defn create-class 
-  [s]
-  (owl-class s :label (database s) :subclass SampleSet 
-    ;;create addition restriction
-    ;(map (fn [part] (e/addition 1 (p/Loc-parse part))) (p/Add (database s)))
-    (map (fn [part] (e/addition (count (filter #{part} (p/Plus (database s)))) (p/Loc-parse part))) (p/Plus (database s)))
+;;create entites with restrictions.
+(defn create-class
+  ;;s is RegID, kar is karyotype string
+  [s kar]
+  (owl-class (str/replace kar " " "") :label s :subclass Sample
+    ;(map (fn [part] (e/addition 1 (p/Loc-parse part))) (p/Add kar))
+    (p/Add-res kar)          
+    (p/Plus-res kar)
     ;;create deletion restriction
-    ;(map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del (database s)))
-    (map (fn [part] (e/deletion (count (filter #{part} (p/Minus (database s)))) (p/Loc-parse part))) (p/Minus (database s)))
+    ;(map (fn [part] (e/deletion 1 (p/Loc-parse part))) (p/Del kar))
+    (p/Del-res kar)
+    (p/Minus-res kar)
     ;;create inversion restriction
-    (map (fn [s] 
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)] 
-               (e/inversion 1 (p/Loc-parse fir) (p/Loc-parse sec))
-             )
-           )
-         ) 
-         (p/Inv (database s))
-    )
+    (p/Inv-res kar)
     ;;craete translocation restriction
-    (map (fn [s]
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)]
-               (e/translocation nil [(p/Loc-parse fir)] [(p/Loc-parse sec)])
-             )
-           )
-         )
-         (p/Tral (database s))
-    )
+    (p/Tral-res kar)
     ;;create duplication restriction.
-    ;;need cover invdup!!
-    (map (fn [s]
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)]
-               (e/duplication nil (p/Loc-parse fir) (p/Loc-parse sec))
-             )
-           )
-         )
-         (p/Dup (database s))
-    )
+    (p/Dup-res kar)
     ;;create triplication restriction.
-    (map (fn [s]
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)]
-               (e/triplication 1 (p/Loc-parse fir) (p/Loc-parse sec))
-             )
-           )
-         )
-         (p/Trp (database s))
-    )
+    (p/Trp-res kar)
     ;;create quadruplication restriction.
-    (map (fn [s]
-           (if (empty? s)
-             ()
-             (let [fir (first s) sec (second s)]
-               (e/quadruplication 1 (p/Loc-parse fir) (p/Loc-parse sec))
-             )
-           )
-         )
-         (p/Qdp (database s))
-    )
-    
-    
+    (p/Qdp-res kar)
+    ;;create insertion restriction.
+    (p/Ins-res kar)
+    ;;create derivative restriction.
+    (p/Der-res kar)
+    ;;create fission restriction.
+    (p/Fis-res kar)
+    ;;create isochromosome restriction.
+    (p/Iso kar)
+    ;;create dicentric restriction.
+    (p/Dic kar)
   )
 )
 
-;(defn check [s] (if (empty? (filter h/band? (map p/Loc-parse (p/Minus (database s))))) () s))
 
+;;run above create-class function for each subclone of karyotype.
+(defn create-class-with-check-subclone
+  [s]
+  (let [layout (str/split (database s) #"/")]
+    (if (= (count layout) 1)
+      ;(owl-class s :label (database s) :subclass Sample
+                 ;(build-restriction (database s)))
+      (create-class s (database s))
+      (for [i (range (count layout))]
+        (let [numb (str s "-" i)
+             kar (layout i)]
+        ;(owl-class (str s "k" i) :label (layout i) 
+        ;           :subclass (owl-class s :subclass Sample)
+        ;           (build-restriction (layout i))
+        ;  )
+          (create-class numb kar)
+          )
+        )
+      )
+    )
+  )
+        
 
-(defn run-pipeline 
+;;parse all input strings and put them into an ontology.
+(defn full-pipeline 
   [] 
-  (map create-class (keys database))
+  (map create-class-with-check-subclone (keys database))
 )
 
-(defn do-pipeline
+;;parse selected range of strings into an ontology.(eg. (do-pipeline [1 1000]))
+(defn range-pipeline
   [start end]
   (for [i (range start end)]
-    (create-class (str i))
+    (if (contains? database (format "%04d" i))
+    (create-class-with-check-subclone (format "%04d" i))
+    )
   )
 )
 
+
+
+;;parse karyotype strings in a list of regid number.(eg. (test-pipeline [1001 1002 1003]))
+(defn select-pipeline
+  [rang]
+  (for [i rang]
+    (if (contains? database (format "%04d" i))
+    (create-class-with-check-subclone (format "%04d" i))
+    )
+    )
+  )
+
+;;test random number karyotype.
+(defn random-pipeline
+  [numb]
+  (let [str-to-num (fn [s] (Integer. s))]
+    (select-pipeline 
+      (map str-to-num 
+           (repeatedly numb #(rand-nth (keys database)))
+           )
+      )
+    )
+  )
+
+;;save ontology
 (defn save-karontology 
   [] 
   (save-ontology "ontology.owl" :owl)
 )
 
-
-(defn dotest 
-  [start end]
-  (for [i (range start end)]
-    (owl-class (str i) :label (database (str i)) :subclass SampleSet
-      (map (fn [s] 
-           (if (empty? s)
-             ()
-             (let [layout (map p/Loc-parse s)] 
-               (e/insertion nil (vector (first layout)) (into [] (rest layout)))
-             )
-           )
-         ) 
-         (p/Ins (database (str i)))
-      )
-    ) 
-  )
-)
+;;test fucntion.
+;(defn dotest 
+  ;[start end]
+  ;(for [i (range start end)]
+    ;(owl-class (str i) :label (database (str i)) :subclass Sample
+      ;(p/Der (database (str i)))
+    ;) 
+  ;)
+;)
     
+;(defn -main [] (let [a (random-pipeline 2000)] (time (r/consistent?))) )
